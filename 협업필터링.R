@@ -11,14 +11,6 @@ colnames(customer)= c("id", "gender", "age", "resi")
 colnames(others) = c("id", "comp","other","date")
 colnames(membership) = c("id", "member","edate")
 
-head(others)
-
-
-head(membership)
-sink('out.txt')
-closeAllConnections()
-gc(reset=T)
-
 head(purchase)
 head(goods)
 head(others)
@@ -105,17 +97,15 @@ g10 = merge(x = pur_bin19, y=pur_bin20, all=TRUE)
 
 if (length(g10.toAdd <- setdiff (colnames(g), names(g10))))
   g10[, c(g10.toAdd) := NA]
-dim(g10)
-
-if (length(g.toAdd <- setdiff (names(g9), names(g))))
-  g[, c(g.toAdd) := NA]
+dim(g10)]
 
 
 pur_bin.t = rbind(g, g2, g3, g4,g5,g6,g7,g8,g9,g10)
 
-dim(pur_bin.t)
+dim(pur_bin.t) #final binary matrix
+write.csv(pur_bin.t, "binarymatrix.csv")
 
-#횟수고려
+#횟수고려(rating matrix)
 install.packages("sqldf")
 library(sqldf)
 dup <- sqldf("SELECT Product, ID, COUNT(*)
@@ -159,14 +149,17 @@ write.csv(rating.matrix, "number.csv", row.names = F)
 
 library(recommenderlab)
 
-num = read.csv("number.csv", stringsAsFactors=F)
+
+
+
 rownames(num) = rownames
 rmatrix = as(num, "realRatingMatrix")
 image(rmatrix)
-#미완성..
-####
 
-m = read.csv("hahahaha.csv", stringsAsFactors = F)
+####
+#협업필터링 적용
+
+m = read.csv("binarymatrix.csv", stringsAsFactors = F)
 m=m[,-1]
 rownames = customer$고객번호
 rownames(m) = rownames
@@ -184,10 +177,10 @@ rownames(pur_bin.t) = custom
 bin.matrix=as.matrix(pur_bin.t)
 bin.matrix[is.na(bin.matrix)] = 0
 head(bin.matrix)[,1:5]
-write.csv(bin.matrix, "hahahaha.csv", row.names = F) #여기까지.
+write.csv(bin.matrix, "binarymatrix.csv", row.names = F) 
 
 ####
-#구매한 횟수도 매트릭스로 본다면..?
+
 rowCounts(bin.rmatrix)[1]
 
 install.packages("recommenderlab")
@@ -355,13 +348,5 @@ vali_accuracy = calcPredictionAccuracy(x=prediction, data=getData(vali, "unknown
 
 eval = evaluate(x=vali, method="UBCF", n=c(3,5,seq(10,100,10)))
 
-#평가
 
-head(results)
-head(result)
-num = sapply(result, function(x) {goods$소분류명[which(x==goods$소분류코드)]})
-head(num)
 
-head(goods$소분류코드)
-which(goods$소분류코드=="A040233")
-which("A040233"==goods$소분류코드)
